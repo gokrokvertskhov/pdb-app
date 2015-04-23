@@ -1,0 +1,76 @@
+Namespaces:
+  =: com.oracle.db.murano-pdb
+  std: io.murano
+  res: io.murano.resources
+  sys: io.murano.system
+  apps: io.murano.apps
+Name: OraclePDB
+Extends: Application
+Properties:
+  name:
+    Contract: $.string().notNull()
+  host:
+    Contract: $.string()
+    Usage: Out
+  user:
+    Contract: $.string()
+    Usage: Out
+  password:
+    Contract: $.string()
+    Usage: Out
+Methods:
+  initialize:
+    Body:
+      - $.environment: $.find(std:Environment).require()
+
+  deploy:
+    Body:
+      - If: not $.getAttr(deployed, false)
+        Then:
+          - $.environment.reporter.report($this, 'Oracle PDB')
+          - $.setAttr(deployed, true)
+
+  createDatabase:
+    Arguments:
+        database:
+          Contract: $.string().notNull()
+    Body:
+        - $.environment.reporter.report($this, 'Creating a DB')
+        - $resources: new(sys:Resources)
+        - $command: $resources.yaml('CreatePDB.template').bind(dict(
+              database => $database,
+              user => $.user,
+              password => $.password
+             ))
+
+  createUser:
+    Arguments:
+        username:
+          Contract: $.string().notNull()
+        password:
+          Contract: $.string().notNull()
+    Body:
+        - $.user: $username
+        - $.password: $password
+
+  assignUser:
+    Arguments:
+        username:
+            Contract: $.string().notNull()
+        database:
+            Contract: $.string().notNull()
+    Body:
+        - $.environment.reporter.report($this, 'Assigning a user to the DB')
+        - $resources: new(sys:Resources)
+        - $command: $resources.yaml('AssignUser.template').bind(dict(
+             time => 'now'
+             ))
+
+  getConnectionString:
+    Arguments:
+        username:
+          Contract: $.string().notNull()
+        password:
+          Contract: $.string().notNull()
+    Body:
+        - $.environment.reporter.report($this, 'Generating a connection string for the PDB')

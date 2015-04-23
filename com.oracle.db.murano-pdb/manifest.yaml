@@ -1,0 +1,10 @@
+Format: 1.0
+Type: Application
+FullName: com.oracle.db.murano-pdb.OraclePDB
+Name: Oracle PDB
+Description: |
+ This application creates a PDB database on physical
+Author: 'Oracle'
+Tags: [oracle,pdb]
+Classes:
+ com.oracle.db.murano-pdb.OraclePDB: OraclePDB.yaml
